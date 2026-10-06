@@ -1,6 +1,6 @@
 # Maintainer: <your name> <you@example.com>
 pkgname=gunner-installer
-pkgver=1.0.0
+pkgver=1.1.0
 pkgrel=1
 pkgdesc="Gunner Installer: GUI installer, updater and manager for selected programs on CachyOS (KDE Plasma)"
 arch=('any')
@@ -22,6 +22,10 @@ source=('gunner_installer.py'
         'gunner-installer.desktop'
         'gunner-installer.svg')
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+pkgver() {
+  grep -oP '__version__ = "\K[^"]+' gunner_installer.py
+}
 
 package() {
   install -Dm644 gunner_installer.py "$pkgdir/usr/share/$pkgname/gunner_installer.py"

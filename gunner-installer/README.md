@@ -27,3 +27,16 @@ Edit the files in this folder, bump `pkgver` (or `pkgrel`) in `PKGBUILD`, and ru
 This project used to be called `cachyos-installer`. Running `./install.sh` removes the old
 package and moves `~/.config/cachyos-installer` to `~/.config/gunner-installer`, so your own
 program list and icons carry over.
+
+## programs.json fields
+
+`id`, `name`, `description`, `category`, `source` (`aur`, `repo` or `flatpak`), `package`, and optionally
+`launch`, `icon` (file or URL) and `icon_repo`. `category` is one of Gaming, Internet, Development,
+Multimedia, Office, Security, Utilities or System (anything else, or nothing, is shown under "Other").
+If you keep your own copy in `~/.config/gunner-installer/`, add `category` to its entries to get them
+grouped on the Install tab.
+
+## Versioning
+
+Semantic Versioning: new features bump the minor version, bug fixes bump the patch version.
+See `CHANGELOG.md`. The version is set once, in `gunner_installer.py`; run `gunner-installer --version` to see it.

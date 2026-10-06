@@ -27,11 +27,12 @@ from PyQt6.QtCore import (
 from PyQt6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
 from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PyQt6.QtWidgets import (
-    QApplication, QCheckBox, QDialog, QDialogButtonBox, QFrame, QGridLayout,
-    QHBoxLayout, QLabel, QMainWindow, QMessageBox, QPlainTextEdit,
+    QApplication, QButtonGroup, QCheckBox, QDialog, QDialogButtonBox, QFrame,
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
     QProgressBar, QPushButton, QScrollArea, QTabWidget, QVBoxLayout, QWidget,
 )
 
+__version__ = "1.1.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
 APP_DIR = Path(__file__).resolve().parent  # where the app (and its default list) is installed
 USER_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "gunner-installer"
 # A programs.json in ~/.config/gunner-installer/ overrides the one shipped with the app,
@@ -42,6 +43,21 @@ ICON_DIRS = (USER_DIR / "icons", APP_DIR / "icons")
 CACHE_DIR = Path.home() / ".cache" / "gunner-installer" / "icons"
 ICON_SIZE = 64
 COLUMNS = 2
+CATEGORIES = ["Gaming", "Internet", "Development", "Multimedia",
+              "Office", "Security", "Utilities", "System"]
+
+
+def program_category(program):
+    return program.get("category") or "Other"
+
+
+def program_matches(program, category, text):
+    """True if the program is in the category ("All" = any) and contains every search word."""
+    if category != "All" and program_category(program) != category:
+        return False
+    haystack = " ".join([program["name"], program["id"], program.get("description", ""),
+                         program_category(program)]).lower()
+    return all(word in haystack for word in text.lower().split())
 ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
 
 
@@ -155,6 +171,16 @@ QFrame#card[selected="true"] {
 }
 QLabel#cardTitle { font-size: 14pt; font-weight: bold; }
 QLabel#cardStatus[kind="update"] { color: palette(highlight); font-weight: bold; }
+QPushButton#chip {
+    border: 1px solid palette(mid);
+    border-radius: 14px;
+    padding: 4px 14px;
+}
+QPushButton#chip:checked {
+    background: palette(highlight);
+    color: palette(highlighted-text);
+    border-color: palette(highlight);
+}
 """
 
 
@@ -309,9 +335,11 @@ def pick_site_icon(html, base):
 
 class ProgramCard(QFrame):
     """Clickable card: icon, name, summary and a checkbox."""
+    changed = pyqtSignal()
 
     def __init__(self, program):
         super().__init__()
+        self.program = program
         self.setObjectName("card")
         self.setProperty("selected", False)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -366,6 +394,7 @@ class ProgramCard(QFrame):
         self.setProperty("selected", self.check.isChecked())
         self.style().unpolish(self)
         self.style().polish(self)
+        self.changed.emit()
 
 
 UPDATE_LINE = re.compile(r"^(\S+)\s+(\S+)\s+->\s+(\S+)")
@@ -534,18 +563,42 @@ class Installer(QMainWindow):
         install_layout = QVBoxLayout(install_tab)
         install_layout.addWidget(QLabel("Select the programs to install:"))
 
+        self.search = QLineEdit()
+        self.search.setPlaceholderText("Search programs…")
+        self.search.setClearButtonEnabled(True)
+        self.search.textChanged.connect(self.apply_filter)
+        install_layout.addWidget(self.search)
+
+        self.category = "All"
+        chips = QHBoxLayout()
+        chips.setSpacing(6)
+        self.chip_group = QButtonGroup(self)
+        for name in ["All"] + self.categories():
+            chip = QPushButton(name)
+            chip.setObjectName("chip")
+            chip.setCheckable(True)
+            chip.setChecked(name == "All")
+            chip.setCursor(Qt.CursorShape.PointingHandCursor)
+            chip.clicked.connect(lambda _=False, n=name: self.set_category(n))
+            self.chip_group.addButton(chip)
+            chips.addWidget(chip)
+        chips.addStretch(1)
+        install_layout.addLayout(chips)
+
         grid_host = QWidget()
         grid = QGridLayout(grid_host)
         grid.setSpacing(12)
         self.cards = []
-        for i, p in enumerate(self.programs):
+        for p in self.programs:
             card = ProgramCard(p)
+            card.changed.connect(self.update_install_button)
             self.cards.append(card)
-            grid.addWidget(card, i // COLUMNS, i % COLUMNS)
             self.load_icon(p, card)
         for col in range(COLUMNS):
             grid.setColumnStretch(col, 1)
-        grid.setRowStretch(len(self.programs) // COLUMNS + 1, 1)
+        self.grid = grid
+        self.empty_label = QLabel("No programs match your search.", grid_host)
+        self.empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
@@ -593,11 +646,47 @@ class Installer(QMainWindow):
         layout.addWidget(self.output, 2)
         self.setCentralWidget(root)
         self.setStyleSheet(STYLE)
+        self.apply_filter()
+        self.update_install_button()
         QTimer.singleShot(0, self.check_helpers)
 
     # ---- helpers -------------------------------------------------------
     def log(self, text):
         self.output.appendPlainText(text.rstrip("\n"))
+
+    def categories(self):
+        used = {program_category(p) for p in self.programs}
+        return [c for c in CATEGORIES if c in used] + sorted(used - set(CATEGORIES))
+
+    def set_category(self, name):
+        self.category = name
+        self.apply_filter()
+
+    def apply_filter(self):
+        """Show only the cards matching the search text and category, packed from the top."""
+        text = self.search.text()
+        self.grid.removeWidget(self.empty_label)
+        self.empty_label.hide()
+        for card in self.cards:
+            self.grid.removeWidget(card)
+        shown = 0
+        for card in self.cards:
+            if program_matches(card.program, self.category, text):
+                self.grid.addWidget(card, shown // COLUMNS, shown % COLUMNS)
+                card.show()
+                shown += 1
+            else:
+                card.hide()
+        if not shown:
+            self.grid.addWidget(self.empty_label, 0, 0, 1, COLUMNS)
+            self.empty_label.show()
+        for row in range(len(self.cards) // COLUMNS + 3):
+            self.grid.setRowStretch(row, 0)
+        self.grid.setRowStretch(max((shown + COLUMNS - 1) // COLUMNS, 1), 1)
+
+    def update_install_button(self):
+        count = sum(1 for card in self.cards if card.isChecked())
+        self.button.setText(f"Install selected ({count})" if count else "Install selected")
 
     def load_icon(self, program, card):
         """Icon order: local file > cached download > installed app/theme icon >
@@ -1005,6 +1094,9 @@ class Installer(QMainWindow):
 
 
 def main():
+    if "--version" in sys.argv:
+        print(f"Gunner Installer {__version__}")
+        return 0
     app = QApplication(sys.argv)
     app.setDesktopFileName("gunner-installer")  # lets Plasma match the window to its launcher
     icon = QIcon.fromTheme("gunner-installer")
