@@ -3,6 +3,7 @@
     "id": "curseforge",
     "name": "CurseForge",
     "description": "Mod, addon and modpack manager for Minecraft, World of Warcraft and many other games. Browse, install and update mods from one place.",
+    "category": "Gaming",
     "source": "aur",
     "package": "curseforge",
     "launch": "curseforge"
@@ -11,6 +12,7 @@
     "id": "amethyst-mod-manager",
     "name": "Amethyst Mod Manager",
     "description": "Native Linux mod manager in the style of Mod Organizer 2. Install and deploy mods for around a hundred games, with Nexus Mods integration, no Wine or Proton needed.",
+    "category": "Gaming",
     "source": "aur",
     "package": "amethyst-mod-manager",
     "launch": "amethyst-mod-manager",
@@ -20,6 +22,7 @@
     "id": "clamui",
     "name": "ClamUI",
     "description": "Modern graphical front end for the ClamAV antivirus. Scan files and folders, keep virus definitions up to date, and review scan results from a clean desktop app.",
+    "category": "Security",
     "source": "repo",
     "package": "clamui",
     "launch": "clamui"
@@ -28,8 +31,45 @@
     "id": "vesktop",
     "name": "Vesktop",
     "description": "A standalone Discord app with Vencord built in and better Linux support, including smooth screen sharing with audio, for the performance of web Discord with the comfort of the desktop app.",
+    "category": "Internet",
     "source": "aur",
     "package": "vesktop",
     "launch": "vesktop"
+  },
+  {
+    "id": "bitwarden",
+    "name": "Bitwarden",
+    "description": "Free, open-source password manager. Keep logins, cards and secure notes in one encrypted vault that syncs across your devices.",
+    "category": "Security",
+    "source": "repo",
+    "package": "bitwarden",
+    "launch": "bitwarden"
+  },
+  {
+    "id": "localsend",
+    "name": "LocalSend",
+    "description": "Send files and messages to nearby devices over your local network, with no internet or account needed. An open-source alternative to AirDrop that works on Linux, Windows, macOS, Android and iOS.",
+    "category": "Internet",
+    "source": "aur",
+    "package": "localsend-bin",
+    "launch": "localsend_app"
+  },
+  {
+    "id": "yubico-authenticator",
+    "name": "Yubico Authenticator",
+    "description": "Manage one-time-password accounts and security settings on your YubiKey from the desktop, with codes generated safely on the key itself.",
+    "category": "Security",
+    "source": "aur",
+    "package": "yubico-authenticator-bin",
+    "launch": "yubico-authenticator"
+  },
+  {
+    "id": "protonvpn",
+    "name": "Proton VPN",
+    "description": "Proton's official VPN app. Connect to servers in many countries with a no-logs service, plus a kill switch and Secure Core routing.",
+    "category": "Security",
+    "source": "repo",
+    "package": "proton-vpn-gtk-app",
+    "launch": "protonvpn-app"
   }
 ]

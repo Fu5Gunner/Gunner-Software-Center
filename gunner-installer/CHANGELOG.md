@@ -9,6 +9,16 @@ Each version opens with a short summary paragraph, followed by the sections that
 Added (new features and programs), Updated (changed items, written as name (old) -> (new))
 and Patched (fixes). Every item gets its own bullet.
 
+## 1.3.0
+
+A more compact Install tab: shorter cards in three columns, so more programs fit on screen.
+
+### Updated
+
+* Install tab program cards (2 columns, 64 px icons, 104 px minimum height) -> (3 columns, 48 px icons, 64 px minimum height)
+* Card summaries (full wrapped text) -> (up to two lines with an ellipsis, full text on hover)
+* Card status (sentence under the summary) -> (short badge beside the name, full text on hover)
+
 ## 1.2.3
 
 A formatting update to the changelog. The app itself is unchanged.

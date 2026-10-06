@@ -29,10 +29,11 @@ from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkReques
 from PyQt6.QtWidgets import (
     QApplication, QButtonGroup, QCheckBox, QDialog, QDialogButtonBox, QFrame,
     QGridLayout, QHBoxLayout, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
-    QProgressBar, QPushButton, QScrollArea, QTabWidget, QVBoxLayout, QWidget,
+    QProgressBar, QPushButton, QScrollArea, QSizePolicy, QTabWidget, QVBoxLayout,
+    QWidget,
 )
 
-__version__ = "1.2.3"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
+__version__ = "1.3.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
 APP_DIR = Path(__file__).resolve().parent  # where the app (and its default list) is installed
 USER_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "gunner-installer"
 # A programs.json in ~/.config/gunner-installer/ overrides the one shipped with the app,
@@ -41,8 +42,8 @@ PROGRAMS_FILE = (USER_DIR / "programs.json"
                  if (USER_DIR / "programs.json").is_file() else APP_DIR / "programs.json")
 ICON_DIRS = (USER_DIR / "icons", APP_DIR / "icons")
 CACHE_DIR = Path.home() / ".cache" / "gunner-installer" / "icons"
-ICON_SIZE = 64
-COLUMNS = 2
+ICON_SIZE = 48
+COLUMNS = 3
 CATEGORIES = ["Gaming", "Internet", "Development", "Multimedia",
               "Office", "Security", "Utilities", "System"]
 
@@ -171,6 +172,10 @@ QFrame#card[selected="true"] {
 }
 QLabel#cardTitle { font-size: 14pt; font-weight: bold; }
 QLabel#cardStatus[kind="update"] { color: palette(highlight); font-weight: bold; }
+QLabel#programTitle { font-size: 11pt; font-weight: bold; }
+QLabel#cardSummary { font-size: 9pt; }
+QLabel#cardBadge { font-size: 8pt; }
+QLabel#cardBadge[kind="update"] { color: palette(highlight); font-weight: bold; }
 QPushButton#chip {
     border: 1px solid palette(mid);
     border-radius: 14px;
@@ -333,6 +338,46 @@ def pick_site_icon(html, base):
     return best
 
 
+def elide_to_lines(fm, text, width, lines):
+    """Word-wrap text into at most `lines` lines of `width` px, ending with an ellipsis if cut."""
+    words = text.split()
+    out = []
+    for n in range(lines):
+        line = ""
+        while words and fm.horizontalAdvance((line + " " + words[0]).strip()) <= width:
+            line = (line + " " + words.pop(0)).strip()
+        if words and (n == lines - 1 or not line):
+            line = fm.elidedText((line + " " + " ".join(words)).strip(),
+                                 Qt.TextElideMode.ElideRight, width)
+            words = []
+        if line:
+            out.append(line)
+        if not words:
+            break
+    return "\n".join(out)
+
+
+class SummaryLabel(QLabel):
+    """Text limited to a few lines with an ellipsis; the full text shows on hover."""
+
+    def __init__(self, text, lines=2, name="cardSummary"):
+        super().__init__(text)
+        self.full, self.max_lines, self._width = text, lines, 0
+        self.setObjectName(name)
+        self.setToolTip(text)
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        self.setFixedHeight(self.fontMetrics().lineSpacing() * lines)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if event.size().width() != self._width:
+            self._width = event.size().width()
+            self.ensurePolished()
+            fm = self.fontMetrics()
+            self.setFixedHeight(fm.lineSpacing() * self.max_lines)
+            self.setText(elide_to_lines(fm, self.full, self._width - 2, self.max_lines))
+
+
 class ProgramCard(QFrame):
     """Clickable card: icon, name, summary and a checkbox."""
     changed = pyqtSignal()
@@ -343,41 +388,43 @@ class ProgramCard(QFrame):
         self.setObjectName("card")
         self.setProperty("selected", False)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setMinimumHeight(104)
+        self.setMinimumHeight(64)
 
         self.icon_label = QLabel()
         self.icon_label.setFixedSize(ICON_SIZE, ICON_SIZE)
 
-        title = QLabel(program["name"])
-        title.setObjectName("cardTitle")
-        summary = QLabel(program.get("description", ""))
-        summary.setWordWrap(True)
-        summary.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-
-        text = QVBoxLayout()
-        text.setSpacing(4)
-        text.addWidget(title)
-        text.addWidget(summary, 1)
+        title = SummaryLabel(program["name"], 1, "programTitle")
+        summary = SummaryLabel(program.get("description", ""))
         self.status = QLabel()
-        self.status.setObjectName("cardStatus")
+        self.status.setObjectName("cardBadge")
         self.status.hide()
-        text.addWidget(self.status)
+
+        head = QHBoxLayout()
+        head.setSpacing(8)
+        head.addWidget(title, 1)
+        head.addWidget(self.status)
+        text = QVBoxLayout()
+        text.setSpacing(2)
+        text.addLayout(head)
+        text.addWidget(summary)
 
         self.check = QCheckBox()
         self.check.toggled.connect(self._refresh)
 
         row = QHBoxLayout(self)
-        row.setContentsMargins(14, 12, 14, 12)
-        row.setSpacing(14)
-        row.addWidget(self.icon_label, 0, Qt.AlignmentFlag.AlignTop)
+        row.setContentsMargins(10, 8, 10, 8)
+        row.setSpacing(10)
+        row.addWidget(self.icon_label, 0, Qt.AlignmentFlag.AlignVCenter)
         row.addLayout(text, 1)
-        row.addWidget(self.check, 0, Qt.AlignmentFlag.AlignTop)
+        row.addWidget(self.check, 0, Qt.AlignmentFlag.AlignVCenter)
 
     def set_icon(self, pixmap):
         self.icon_label.setPixmap(pixmap)
 
     def set_status(self, text, kind=""):
-        self.status.setText(text)
+        """Short badge beside the name; the full text is the tooltip."""
+        self.status.setText(("Update" if kind == "update" else "Installed") if text else "")
+        self.status.setToolTip(text)
         self.status.setProperty("kind", kind)
         self.status.style().unpolish(self.status)
         self.status.style().polish(self.status)
