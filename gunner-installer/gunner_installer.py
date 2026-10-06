@@ -32,7 +32,7 @@ from PyQt6.QtWidgets import (
     QProgressBar, QPushButton, QScrollArea, QTabWidget, QVBoxLayout, QWidget,
 )
 
-__version__ = "1.1.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
+__version__ = "1.2.3"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
 APP_DIR = Path(__file__).resolve().parent  # where the app (and its default list) is installed
 USER_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "gunner-installer"
 # A programs.json in ~/.config/gunner-installer/ overrides the one shipped with the app,

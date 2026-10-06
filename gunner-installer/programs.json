@@ -35,5 +35,41 @@
     "source": "aur",
     "package": "vesktop",
     "launch": "vesktop"
+  },
+  {
+    "id": "bitwarden",
+    "name": "Bitwarden",
+    "description": "Free, open-source password manager. Keep logins, cards and secure notes in one encrypted vault that syncs across your devices.",
+    "category": "Security",
+    "source": "repo",
+    "package": "bitwarden",
+    "launch": "bitwarden"
+  },
+  {
+    "id": "localsend",
+    "name": "LocalSend",
+    "description": "Send files and messages to nearby devices over your local network, with no internet or account needed. An open-source alternative to AirDrop that works on Linux, Windows, macOS, Android and iOS.",
+    "category": "Internet",
+    "source": "aur",
+    "package": "localsend-bin",
+    "launch": "localsend_app"
+  },
+  {
+    "id": "yubico-authenticator",
+    "name": "Yubico Authenticator",
+    "description": "Manage one-time-password accounts and security settings on your YubiKey from the desktop, with codes generated safely on the key itself.",
+    "category": "Security",
+    "source": "aur",
+    "package": "yubico-authenticator-bin",
+    "launch": "yubico-authenticator"
+  },
+  {
+    "id": "protonvpn",
+    "name": "Proton VPN",
+    "description": "Proton's official VPN app. Connect to servers in many countries with a no-logs service, plus a kill switch and Secure Core routing.",
+    "category": "Security",
+    "source": "repo",
+    "package": "proton-vpn-gtk-app",
+    "launch": "protonvpn-app"
   }
 ]
