@@ -1,0 +1,35 @@
+[
+  {
+    "id": "curseforge",
+    "name": "CurseForge",
+    "description": "Mod, addon and modpack manager for Minecraft, World of Warcraft and many other games. Browse, install and update mods from one place.",
+    "source": "aur",
+    "package": "curseforge",
+    "launch": "curseforge"
+  },
+  {
+    "id": "amethyst-mod-manager",
+    "name": "Amethyst Mod Manager",
+    "description": "Native Linux mod manager in the style of Mod Organizer 2. Install and deploy mods for around a hundred games, with Nexus Mods integration, no Wine or Proton needed.",
+    "source": "aur",
+    "package": "amethyst-mod-manager",
+    "launch": "amethyst-mod-manager",
+    "icon": "https://github.com/ChrisDKN/Amethyst-Mod-Manager/blob/main/src/icons/Logo.png?raw=true"
+  },
+  {
+    "id": "clamui",
+    "name": "ClamUI",
+    "description": "Modern graphical front end for the ClamAV antivirus. Scan files and folders, keep virus definitions up to date, and review scan results from a clean desktop app.",
+    "source": "repo",
+    "package": "clamui",
+    "launch": "clamui"
+  },
+  {
+    "id": "vesktop",
+    "name": "Vesktop",
+    "description": "A standalone Discord app with Vencord built in and better Linux support, including smooth screen sharing with audio, for the performance of web Discord with the comfort of the desktop app.",
+    "source": "aur",
+    "package": "vesktop",
+    "launch": "vesktop"
+  }
+]

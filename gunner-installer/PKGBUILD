@@ -1,0 +1,33 @@
+# Maintainer: <your name> <you@example.com>
+pkgname=gunner-installer
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Gunner Installer: GUI installer, updater and manager for selected programs on CachyOS (KDE Plasma)"
+arch=('any')
+license=('custom')   # set this to the license you want to release under
+conflicts=('cachyos-installer')
+replaces=('cachyos-installer')
+depends=('python' 'python-pyqt6' 'kdialog' 'sudo' 'pacman')
+optdepends=(
+  'pacman-contrib: checkupdates, for safe update checks of repo packages'
+  'flatpak: install and update Flatpak programs'
+  'qt6-svg: show SVG program icons'
+  'qt6-imageformats: show WebP and ICO program icons'
+  'paru: AUR helper (the app can also install paru or yay for you)'
+)
+# Local files next to this PKGBUILD, so checksums are skipped to make editing easy.
+source=('gunner_installer.py'
+        'programs.json'
+        'gunner-installer.sh'
+        'gunner-installer.desktop'
+        'gunner-installer.svg')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm644 gunner_installer.py "$pkgdir/usr/share/$pkgname/gunner_installer.py"
+  install -Dm644 programs.json "$pkgdir/usr/share/$pkgname/programs.json"
+  install -Dm755 gunner-installer.sh "$pkgdir/usr/bin/$pkgname"
+  install -Dm644 gunner-installer.desktop "$pkgdir/usr/share/applications/$pkgname.desktop"
+  install -Dm644 gunner-installer.svg \
+    "$pkgdir/usr/share/icons/hicolor/scalable/apps/$pkgname.svg"
+}

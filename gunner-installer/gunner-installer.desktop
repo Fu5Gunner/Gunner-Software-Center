@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Gunner Installer
+GenericName=Program Installer and Updater
+Comment=Install, update and manage selected programs
+Exec=gunner-installer
+Icon=gunner-installer
+Terminal=false
+StartupNotify=true
+Categories=System;PackageManager;Qt;
+Keywords=install;update;uninstall;aur;paru;yay;flatpak;
