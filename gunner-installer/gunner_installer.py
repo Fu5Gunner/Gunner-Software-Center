@@ -22,18 +22,18 @@ from pathlib import Path
 from urllib.parse import quote, urljoin, urlparse
 
 from PyQt6.QtCore import (
-    QProcess, QProcessEnvironment, Qt, QThread, QTimer, QUrl, pyqtSignal,
+    QProcess, QProcessEnvironment, QSize, Qt, QThread, QTimer, QUrl, pyqtSignal,
 )
 from PyQt6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
 from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PyQt6.QtWidgets import (
-    QApplication, QButtonGroup, QCheckBox, QDialog, QDialogButtonBox, QFrame,
-    QGridLayout, QHBoxLayout, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
+    QApplication, QCheckBox, QDialog, QDialogButtonBox, QFrame,
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit,
     QProgressBar, QPushButton, QScrollArea, QSizePolicy, QTabWidget, QVBoxLayout,
     QWidget,
 )
 
-__version__ = "1.3.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
+__version__ = "1.4.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
 APP_DIR = Path(__file__).resolve().parent  # where the app (and its default list) is installed
 USER_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "gunner-installer"
 # A programs.json in ~/.config/gunner-installer/ overrides the one shipped with the app,
@@ -46,6 +46,16 @@ ICON_SIZE = 48
 COLUMNS = 3
 CATEGORIES = ["Gaming", "Internet", "Development", "Multimedia",
               "Office", "Security", "Utilities", "System"]
+
+
+# Icon-theme names for the sidebar entries (Breeze provides all of these on Plasma).
+CATEGORY_ICONS = {
+    "All": "view-list-icons", "Gaming": "applications-games",
+    "Internet": "applications-internet", "Development": "applications-development",
+    "Multimedia": "applications-multimedia", "Office": "applications-office",
+    "Security": "security-high", "Utilities": "applications-utilities",
+    "System": "applications-system", "Other": "applications-other",
+}
 
 
 def program_category(program):
@@ -176,15 +186,11 @@ QLabel#programTitle { font-size: 11pt; font-weight: bold; }
 QLabel#cardSummary { font-size: 9pt; }
 QLabel#cardBadge { font-size: 8pt; }
 QLabel#cardBadge[kind="update"] { color: palette(highlight); font-weight: bold; }
-QPushButton#chip {
-    border: 1px solid palette(mid);
-    border-radius: 14px;
-    padding: 4px 14px;
-}
-QPushButton#chip:checked {
+QListWidget#sidebar { border: none; background: transparent; outline: 0; }
+QListWidget#sidebar::item { padding: 6px 8px; border-radius: 6px; }
+QListWidget#sidebar::item:selected {
     background: palette(highlight);
     color: palette(highlighted-text);
-    border-color: palette(highlight);
 }
 """
 
@@ -590,7 +596,7 @@ class Installer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Gunner Installer")
-        self.resize(860, 680)
+        self.resize(1020, 680)
         self.net = QNetworkAccessManager(self)
         self.net_tried = set()  # (program id, helper) pairs whose icon lookup already ran
         self.finders = []       # keeps UpstreamFinder threads alive
@@ -607,7 +613,12 @@ class Installer(QMainWindow):
         root = QWidget()
         layout = QVBoxLayout(root)
         install_tab = QWidget()
-        install_layout = QVBoxLayout(install_tab)
+        install_page = QHBoxLayout(install_tab)
+        install_layout = QVBoxLayout()  # right-hand side: search, cards, install button
+        self.category = "All"
+        self.build_sidebar()
+        install_page.addWidget(self.sidebar)
+        install_page.addLayout(install_layout, 1)
         install_layout.addWidget(QLabel("Select the programs to install:"))
 
         self.search = QLineEdit()
@@ -616,21 +627,6 @@ class Installer(QMainWindow):
         self.search.textChanged.connect(self.apply_filter)
         install_layout.addWidget(self.search)
 
-        self.category = "All"
-        chips = QHBoxLayout()
-        chips.setSpacing(6)
-        self.chip_group = QButtonGroup(self)
-        for name in ["All"] + self.categories():
-            chip = QPushButton(name)
-            chip.setObjectName("chip")
-            chip.setCheckable(True)
-            chip.setChecked(name == "All")
-            chip.setCursor(Qt.CursorShape.PointingHandCursor)
-            chip.clicked.connect(lambda _=False, n=name: self.set_category(n))
-            self.chip_group.addButton(chip)
-            chips.addWidget(chip)
-        chips.addStretch(1)
-        install_layout.addLayout(chips)
 
         grid_host = QWidget()
         grid = QGridLayout(grid_host)
@@ -704,6 +700,36 @@ class Installer(QMainWindow):
     def categories(self):
         used = {program_category(p) for p in self.programs}
         return [c for c in CATEGORIES if c in used] + sorted(used - set(CATEGORIES))
+
+    def build_sidebar(self):
+        """Left-hand list in the style of a software center: Discover, then Categories."""
+        self.sidebar = QListWidget()
+        self.sidebar.setObjectName("sidebar")
+        self.sidebar.setFixedWidth(190)
+        self.sidebar.setIconSize(QSize(18, 18))
+        for title, names in (("Discover", ["All"]), ("Categories", self.categories())):
+            header = QListWidgetItem(title)
+            header.setFlags(Qt.ItemFlag.NoItemFlags)  # a label, not selectable
+            font = header.font()
+            font.setBold(True)
+            font.setPointSize(8)
+            header.setFont(font)
+            header.setForeground(self.palette().placeholderText())
+            header.setSizeHint(QSize(0, 30))
+            self.sidebar.addItem(header)
+            for name in names:
+                item = QListWidgetItem(
+                    QIcon.fromTheme(CATEGORY_ICONS.get(name, "applications-other")),
+                    "All Applications" if name == "All" else name)
+                item.setData(Qt.ItemDataRole.UserRole, name)
+                self.sidebar.addItem(item)
+                if name == "All":
+                    self.sidebar.setCurrentItem(item)
+        self.sidebar.currentItemChanged.connect(self.sidebar_changed)
+
+    def sidebar_changed(self, item, _previous):
+        if item is not None and item.data(Qt.ItemDataRole.UserRole):
+            self.set_category(item.data(Qt.ItemDataRole.UserRole))
 
     def set_category(self, name):
         self.category = name

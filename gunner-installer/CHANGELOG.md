@@ -9,6 +9,20 @@ Each version opens with a short summary paragraph, followed by the sections that
 Added (new features and programs), Updated (changed items, written as name (old) -> (new))
 and Patched (fixes). Every item gets its own bullet.
 
+## 1.4.0
+
+The category filter moves into a left-hand sidebar in the style of a software center, with a Discover section and an icon for each category.
+
+### Added
+
+* Left sidebar on the Install tab with Discover and Categories sections
+* Category icons from your icon theme
+
+### Updated
+
+* Category filter (row of chips above the cards) -> (sidebar list on the left)
+* Default window size (860 x 680) -> (1020 x 680)
+
 ## 1.3.0
 
 A more compact Install tab: shorter cards in three columns, so more programs fit on screen.
