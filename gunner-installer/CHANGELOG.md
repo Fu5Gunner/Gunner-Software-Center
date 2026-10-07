@@ -9,6 +9,38 @@ Each version opens with a short summary paragraph, followed by the sections that
 Added (new features and programs), Updated (changed items, written as name (old) -> (new))
 and Patched (fixes). Every item gets its own bullet.
 
+## 1.7.0
+
+Eighteen new programs join the catalog, from office tools and emulators to game launchers. Flatpak installs are now more reliable, and command-line tools no longer get a Launch button.
+
+### Added
+
+* lsfg-vk
+* FileZilla
+* Heroic Games Launcher
+* LibreOffice
+* Prism Launcher
+* VLC
+* Thunderbird
+* Tailscale
+* KDE Connect
+* Remmina
+* 7-Zip
+* Vintage Story
+* yt-dlp
+* RetroArch
+* 2009scape
+* xemu
+* Unreal Tournament 2004 Launcher
+* Space Cadet Pinball
+* Optional `cli` field in `programs.json` for command-line tools
+* Automatic Flatpak install when a selected program needs it
+
+### Updated
+
+* Flathub Flatpak installs (system-wide, Flathub remote assumed) -> (per-user, Flathub remote added automatically)
+* Flatpak update checks (default installation only) -> (default and per-user installations)
+
 ## 1.6.1
 
 Uninstalling repo and AUR programs could fail with repeated "Sorry, try again" password errors. It now asks for your password through the system's own polkit dialog.

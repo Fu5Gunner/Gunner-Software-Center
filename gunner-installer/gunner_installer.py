@@ -33,7 +33,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-__version__ = "1.6.1"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
+__version__ = "1.7.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
 APP_DIR = Path(__file__).resolve().parent  # where the app (and its default list) is installed
 USER_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "gunner-installer"
 # A programs.json in ~/.config/gunner-installer/ overrides the one shipped with the app,
@@ -44,6 +44,8 @@ ICON_DIRS = (USER_DIR / "icons", APP_DIR / "icons")
 CACHE_DIR = Path.home() / ".cache" / "gunner-installer" / "icons"
 ICON_SIZE = 48
 COLUMNS = 3
+FLATHUB_REMOTE_CMD = ["flatpak", "remote-add", "--user", "--if-not-exists", "flathub",
+                      "https://dl.flathub.org/repo/flathub.flatpakrepo"]
 CATEGORIES = ["Gaming", "Internet", "Development", "Multimedia",
               "Office", "Security", "Utilities", "System"]
 
@@ -525,11 +527,12 @@ class UpdateChecker(QThread):
                 if parts and parts[0].strip():
                     flat_versions[parts[0].strip()] = parts[1].strip() if len(parts) > 1 else ""
             if self.with_updates:
-                for line in sh(["flatpak", "remote-ls", "--updates", "--app",
-                                "--columns=application,version"]).splitlines():
-                    parts = line.split()
-                    if parts:
-                        flat_updates[parts[0]] = ("", parts[1] if len(parts) > 1 else "")
+                for scope in ([], ["--user"]):  # default installation(s), then per-user
+                    for line in sh(["flatpak", "remote-ls", *scope, "--updates", "--app",
+                                    "--columns=application,version"]).splitlines():
+                        parts = line.split()
+                        if parts:
+                            flat_updates[parts[0]] = ("", parts[1] if len(parts) > 1 else "")
 
         results = {}
         for p in self.programs:
@@ -569,9 +572,11 @@ class ManageRow(QFrame):
             status.setProperty("kind", "update")
             text.addWidget(status)
 
-        launch = QPushButton("Launch")
-        launch.clicked.connect(lambda _=False: on_launch())
-        buttons = [launch]
+        buttons = []
+        if not program.get("cli"):  # command-line tools have nothing to launch
+            launch = QPushButton("Launch")
+            launch.clicked.connect(lambda _=False: on_launch())
+            buttons.append(launch)
         if info.get("update"):
             update = QPushButton("Update")
             update.clicked.connect(lambda _=False: on_update())
@@ -1094,10 +1099,6 @@ class Installer(QMainWindow):
         """For programs shipped as a .flatpak file on the vendor's site (not on Flathub):
         open the official download page, or let the user choose the file they downloaded."""
         name = program["name"]
-        if not shutil.which("flatpak"):
-            QMessageBox.warning(self, "Flatpak missing",
-                                f"{name} is installed with Flatpak.\nInstall it first: sudo pacman -S flatpak")
-            return None
         box = QMessageBox(self)
         box.setWindowTitle(f"Install {name}")
         box.setText(f"{name} isn't on Flathub. The official .flatpak file is on the vendor's site:\n"
@@ -1138,14 +1139,13 @@ class Installer(QMainWindow):
                 if p.get("download_page"):  # the vendor ships a .flatpak file, not on Flathub
                     bundle = self.pick_bundle(p)
                     if bundle:
-                        steps.append((name, f"Add the Flathub remote for {name}",
-                                      ["flatpak", "remote-add", "--user", "--if-not-exists", "flathub",
-                                       "https://dl.flathub.org/repo/flathub.flatpakrepo"]))
+                        steps.append((name, f"Add the Flathub remote for {name}", FLATHUB_REMOTE_CMD))
                         steps.append((name, f"Install {name}",
                                       ["flatpak", "install", "--user", "-y", "--noninteractive", bundle]))
                     continue
+                steps.append((name, f"Add the Flathub remote for {name}", FLATHUB_REMOTE_CMD))
                 steps.append((name, f"Install {name}",
-                              ["flatpak", "install", "-y", "--noninteractive", "flathub", pkg]))
+                              ["flatpak", "install", "--user", "-y", "--noninteractive", "flathub", pkg]))
                 continue
             base = [self.helper, "-S", "--needed", "--noconfirm",
                     "--sudoflags", "-A"] + review_flags(self.helper)
@@ -1158,6 +1158,9 @@ class Installer(QMainWindow):
                 if picked:
                     steps.append((name, f"Recommended dependencies for {name}",
                                   base + ["--asdeps"] + picked))
+        if not shutil.which("flatpak") and any(step[2][0] == "flatpak" for step in steps):
+            steps.insert(0, ("flatpak-setup", "Install Flatpak",
+                             ["pkexec", "pacman", "-S", "--needed", "--noconfirm", "flatpak"]))
         if not steps:
             self.set_busy(False)
             self.log("Nothing to install.")

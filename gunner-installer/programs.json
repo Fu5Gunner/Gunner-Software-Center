@@ -161,5 +161,161 @@
     "source": "flatpak",
     "package": "com.hypixel.HytaleLauncher",
     "download_page": "https://accounts.hytale.com/download"
+  },
+  {
+    "id": "lsfg-vk",
+    "name": "lsfg-vk",
+    "description": "Lossless Scaling frame generation for Linux games, as a Vulkan layer. Launch opens its configuration editor, where you set up a profile per game. Needs Lossless Scaling from Steam.",
+    "category": "Gaming",
+    "source": "repo",
+    "package": "lsfg-vk",
+    "launch": "lsfg-vk-ui"
+  },
+  {
+    "id": "filezilla",
+    "name": "FileZilla",
+    "description": "Fast, reliable FTP, FTPS and SFTP client with a drag-and-drop interface, a site manager and a transfer queue.",
+    "category": "Internet",
+    "source": "repo",
+    "package": "filezilla",
+    "launch": "filezilla"
+  },
+  {
+    "id": "heroic",
+    "name": "Heroic Games Launcher",
+    "description": "Open-source launcher for your Epic Games, GOG and Amazon Games libraries, with built-in Wine and Proton management.",
+    "category": "Gaming",
+    "source": "flatpak",
+    "package": "com.heroicgameslauncher.hgl"
+  },
+  {
+    "id": "libreoffice",
+    "name": "LibreOffice",
+    "description": "Full office suite with a word processor, spreadsheets, presentations, drawing and databases, compatible with Microsoft Office files.",
+    "category": "Office",
+    "source": "repo",
+    "package": "libreoffice-fresh",
+    "launch": "libreoffice"
+  },
+  {
+    "id": "prismlauncher",
+    "name": "Prism Launcher",
+    "description": "Minecraft launcher that manages many separate instances, mod loaders and Java versions, with several accounts supported.",
+    "category": "Gaming",
+    "source": "repo",
+    "package": "prismlauncher",
+    "launch": "prismlauncher"
+  },
+  {
+    "id": "vlc",
+    "name": "VLC",
+    "description": "Plays almost any audio or video file, disc or network stream without extra codec packs.",
+    "category": "Multimedia",
+    "source": "repo",
+    "package": "vlc",
+    "launch": "vlc"
+  },
+  {
+    "id": "thunderbird",
+    "name": "Thunderbird",
+    "description": "Mozilla's open-source email client with calendar, contacts, tabs and strong spam and privacy controls.",
+    "category": "Internet",
+    "source": "repo",
+    "package": "thunderbird",
+    "launch": "thunderbird"
+  },
+  {
+    "id": "tailscale",
+    "name": "Tailscale",
+    "description": "Zero-config VPN that links your devices into one private network. Launch starts the system tray app. After installing, enable the service and sign in (see the README).",
+    "category": "Internet",
+    "source": "repo",
+    "package": "tailscale",
+    "launch": "tailscale systray"
+  },
+  {
+    "id": "kdeconnect",
+    "name": "KDE Connect",
+    "description": "Connects your phone and computer: shared clipboard, notifications on the desktop, file transfer, remote input and media control.",
+    "category": "Utilities",
+    "source": "repo",
+    "package": "kdeconnect",
+    "launch": "kdeconnect-app"
+  },
+  {
+    "id": "remmina",
+    "name": "Remmina",
+    "description": "Remote desktop client that supports RDP, VNC, SSH and SPICE connections, with saved connection profiles.",
+    "category": "Internet",
+    "source": "repo",
+    "package": "remmina",
+    "launch": "remmina"
+  },
+  {
+    "id": "7zip",
+    "name": "7-Zip",
+    "description": "High-ratio file archiver for 7z, zip, tar and many other formats. This installs the command-line tool (7zz); KDE's Ark can use it for 7z files.",
+    "category": "Utilities",
+    "source": "repo",
+    "package": "7zip",
+    "cli": true
+  },
+  {
+    "id": "vintagestory",
+    "name": "Vintage Story",
+    "description": "Sandbox survival game of exploration, crafting and building in a procedurally generated world, with a large mod scene.",
+    "category": "Gaming",
+    "source": "flatpak",
+    "package": "at.vintagestory.VintageStory"
+  },
+  {
+    "id": "yt-dlp",
+    "name": "yt-dlp",
+    "description": "Command-line tool that downloads video and audio from YouTube and thousands of other sites. Install ffmpeg too for merging and converting.",
+    "category": "Multimedia",
+    "source": "repo",
+    "package": "yt-dlp",
+    "cli": true
+  },
+  {
+    "id": "retroarch",
+    "name": "RetroArch",
+    "description": "Front end for emulators and game engines, with one interface for many 'cores' (add cores from the optional dependencies or inside RetroArch).",
+    "category": "Gaming",
+    "source": "repo",
+    "package": "retroarch",
+    "launch": "retroarch"
+  },
+  {
+    "id": "2009scape",
+    "name": "2009scape",
+    "description": "Free, open-source launcher for the 2009scape RuneScape 2009 emulation server.",
+    "category": "Gaming",
+    "source": "flatpak",
+    "package": "org._2009scape.Launcher"
+  },
+  {
+    "id": "xemu",
+    "name": "xemu",
+    "description": "Original Xbox emulator. You provide your own BIOS and hard-disk image, which this app doesn't include.",
+    "category": "Gaming",
+    "source": "flatpak",
+    "package": "app.xemu.xemu"
+  },
+  {
+    "id": "ut2004",
+    "name": "Unreal Tournament 2004 Launcher",
+    "description": "Sets up the native Linux port of Unreal Tournament 2004 with fixes for modern systems. Needs the official game files. Not affiliated with Epic Games.",
+    "category": "Gaming",
+    "source": "flatpak",
+    "package": "com.epicgames.ut2004"
+  },
+  {
+    "id": "spacecadetpinball",
+    "name": "Space Cadet Pinball",
+    "description": "The classic Windows pinball game, rebuilt as a native open-source port that runs on Linux.",
+    "category": "Gaming",
+    "source": "flatpak",
+    "package": "com.github.k4zmu2a.spacecadetpinball"
   }
 ]
