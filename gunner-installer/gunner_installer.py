@@ -33,7 +33,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-__version__ = "1.6.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
+__version__ = "1.6.1"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
 APP_DIR = Path(__file__).resolve().parent  # where the app (and its default list) is installed
 USER_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "gunner-installer"
 # A programs.json in ~/.config/gunner-installer/ overrides the one shipped with the app,
@@ -1035,12 +1035,15 @@ class Installer(QMainWindow):
                 f"Uninstall {name}?\n\nThis removes {detail}.",
         ) != QMessageBox.StandardButton.Yes:
             return
-        if not self.ensure_askpass():
-            return
         if flat:
             cmd = ["flatpak", "uninstall", "-y", "--noninteractive", p["package"]]
         else:
-            cmd = ["sudo", "-A", "pacman", "-Rns", "--noconfirm", p["package"]]
+            # pkexec shows the system's own (polkit) password dialog and handles retries.
+            if not shutil.which("pkexec"):
+                QMessageBox.warning(self, "pkexec not found",
+                                    "Uninstalling needs polkit:\nsudo pacman -S polkit")
+                return
+            cmd = ["pkexec", "pacman", "-Rns", "--noconfirm", p["package"]]
         self.set_busy(True)
         self.failed.clear()
         self.steps = [(name, f"Uninstall {name}", cmd)]

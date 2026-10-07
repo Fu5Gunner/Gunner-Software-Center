@@ -9,6 +9,14 @@ Each version opens with a short summary paragraph, followed by the sections that
 Added (new features and programs), Updated (changed items, written as name (old) -> (new))
 and Patched (fixes). Every item gets its own bullet.
 
+## 1.6.1
+
+Uninstalling repo and AUR programs could fail with repeated "Sorry, try again" password errors. It now asks for your password through the system's own polkit dialog.
+
+### Patched
+
+* uninstall of repo and AUR programs failing with repeated password errors, now using the polkit (pkexec) password dialog
+
 ## 1.6.0
 
 The official Hytale Launcher joins the catalog, along with support for programs that are distributed as a .flatpak file on the vendor's own site instead of Flathub.
