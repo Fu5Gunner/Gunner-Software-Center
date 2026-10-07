@@ -9,6 +9,22 @@ Each version opens with a short summary paragraph, followed by the sections that
 Added (new features and programs), Updated (changed items, written as name (old) -> (new))
 and Patched (fixes). Every item gets its own bullet.
 
+## 1.5.0
+
+Nine new programs join the catalog, covering browsers, downloads and game launchers.
+
+### Added
+
+* JDownloader
+* qBittorrent
+* Faugus Launcher
+* Lutris
+* Steam
+* Tor Browser
+* Firefox
+* Waterfox
+* Brave
+
 ## 1.4.0
 
 The category filter moves into a left-hand sidebar in the style of a software center, with a Discover section and an icon for each category.
