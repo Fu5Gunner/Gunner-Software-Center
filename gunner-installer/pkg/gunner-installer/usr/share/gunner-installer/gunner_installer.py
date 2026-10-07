@@ -24,16 +24,16 @@ from urllib.parse import quote, urljoin, urlparse
 from PyQt6.QtCore import (
     QProcess, QProcessEnvironment, QSize, Qt, QThread, QTimer, QUrl, pyqtSignal,
 )
-from PyQt6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
+from PyQt6.QtGui import QColor, QDesktopServices, QFont, QIcon, QPainter, QPixmap
 from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PyQt6.QtWidgets import (
-    QApplication, QCheckBox, QDialog, QDialogButtonBox, QFrame,
+    QApplication, QCheckBox, QDialog, QDialogButtonBox, QFileDialog, QFrame,
     QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit,
     QProgressBar, QPushButton, QScrollArea, QSizePolicy, QTabWidget, QVBoxLayout,
     QWidget,
 )
 
-__version__ = "1.4.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
+__version__ = "1.6.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
 APP_DIR = Path(__file__).resolve().parent  # where the app (and its default list) is installed
 USER_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "gunner-installer"
 # A programs.json in ~/.config/gunner-installer/ overrides the one shipped with the app,
@@ -778,6 +778,8 @@ class Installer(QMainWindow):
             self.fetch_icon(program, card, url)
         elif program.get("icon_repo"):
             self.discover_repo_icon(program, card, program["icon_repo"])
+        elif program.get("download_page"):
+            self.discover_site_icon(program, card, program["download_page"])
         else:
             finder = UpstreamFinder(program, self.helper)
             finder.done.connect(
@@ -1085,6 +1087,34 @@ class Installer(QMainWindow):
         self.run_next()
 
     # ---- install flow --------------------------------------------------
+    def pick_bundle(self, program):
+        """For programs shipped as a .flatpak file on the vendor's site (not on Flathub):
+        open the official download page, or let the user choose the file they downloaded."""
+        name = program["name"]
+        if not shutil.which("flatpak"):
+            QMessageBox.warning(self, "Flatpak missing",
+                                f"{name} is installed with Flatpak.\nInstall it first: sudo pacman -S flatpak")
+            return None
+        box = QMessageBox(self)
+        box.setWindowTitle(f"Install {name}")
+        box.setText(f"{name} isn't on Flathub. The official .flatpak file is on the vendor's site:\n"
+                    f"{program['download_page']}\n\nOnly download it from there.")
+        choose = box.addButton("Choose downloaded file…", QMessageBox.ButtonRole.AcceptRole)
+        page = box.addButton("Open download page", QMessageBox.ButtonRole.ActionRole)
+        box.addButton(QMessageBox.StandardButton.Cancel)
+        box.exec()
+        clicked = box.clickedButton()
+        if clicked is page:
+            QDesktopServices.openUrl(QUrl(program["download_page"]))
+            self.log(f"Opened {program['download_page']}. Download the .flatpak file, "
+                     f"then install {name} again and choose it.")
+        elif clicked is choose:
+            path, _ = QFileDialog.getOpenFileName(
+                self, f"Choose the {name} .flatpak file", str(Path.home() / "Downloads"),
+                "Flatpak bundles (*.flatpak)")
+            return path or None
+        return None
+
     def install_selected(self):
         chosen = [p for p, card in zip(self.programs, self.cards) if card.isChecked()]
         if not chosen:
@@ -1102,6 +1132,15 @@ class Installer(QMainWindow):
         for p in chosen:
             name, pkg = p["name"], p["package"]
             if p.get("source", "aur") == "flatpak":
+                if p.get("download_page"):  # the vendor ships a .flatpak file, not on Flathub
+                    bundle = self.pick_bundle(p)
+                    if bundle:
+                        steps.append((name, f"Add the Flathub remote for {name}",
+                                      ["flatpak", "remote-add", "--user", "--if-not-exists", "flathub",
+                                       "https://dl.flathub.org/repo/flathub.flatpakrepo"]))
+                        steps.append((name, f"Install {name}",
+                                      ["flatpak", "install", "--user", "-y", "--noninteractive", bundle]))
+                    continue
                 steps.append((name, f"Install {name}",
                               ["flatpak", "install", "-y", "--noninteractive", "flathub", pkg]))
                 continue
@@ -1116,6 +1155,10 @@ class Installer(QMainWindow):
                 if picked:
                     steps.append((name, f"Recommended dependencies for {name}",
                                   base + ["--asdeps"] + picked))
+        if not steps:
+            self.set_busy(False)
+            self.log("Nothing to install.")
+            return
         self.steps = steps
         self.run_next()
 

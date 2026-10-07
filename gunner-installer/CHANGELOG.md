@@ -9,6 +9,16 @@ Each version opens with a short summary paragraph, followed by the sections that
 Added (new features and programs), Updated (changed items, written as name (old) -> (new))
 and Patched (fixes). Every item gets its own bullet.
 
+## 1.6.0
+
+The official Hytale Launcher joins the catalog, along with support for programs that are distributed as a .flatpak file on the vendor's own site instead of Flathub.
+
+### Added
+
+* Hytale Launcher
+* Install flow for vendor .flatpak files (open the official download page, then choose the downloaded file)
+* Optional `download_page` field in `programs.json` for programs distributed that way
+
 ## 1.5.0
 
 Nine new programs join the catalog, covering browsers, downloads and game launchers.

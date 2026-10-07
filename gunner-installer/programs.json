@@ -152,5 +152,14 @@
     "source": "aur",
     "package": "brave-bin",
     "launch": "brave"
+  },
+  {
+    "id": "hytale-launcher",
+    "name": "Hytale Launcher",
+    "description": "The official launcher for Hytale, Hypixel Studios' block-based sandbox adventure game. It downloads, installs and updates the game for you.",
+    "category": "Gaming",
+    "source": "flatpak",
+    "package": "com.hypixel.HytaleLauncher",
+    "download_page": "https://accounts.hytale.com/download"
   }
 ]

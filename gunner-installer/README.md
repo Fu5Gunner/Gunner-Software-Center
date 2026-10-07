@@ -31,7 +31,8 @@ program list and icons carry over.
 ## programs.json fields
 
 `id`, `name`, `description`, `category`, `source` (`aur`, `repo` or `flatpak`), `package`, and optionally
-`launch`, `icon` (file or URL) and `icon_repo`. `category` is one of Gaming, Internet, Development,
+`launch`, `icon` (file or URL), `icon_repo`, and `download_page` (for programs the vendor ships as a
+`.flatpak` file instead of on Flathub). `category` is one of Gaming, Internet, Development,
 Multimedia, Office, Security, Utilities or System (anything else, or nothing, is shown under "Other").
 If you keep your own copy in `~/.config/gunner-installer/`, add `category` to its entries to get them
 grouped on the Install tab.

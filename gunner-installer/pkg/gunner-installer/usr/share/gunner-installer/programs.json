@@ -71,5 +71,95 @@
     "source": "repo",
     "package": "proton-vpn-gtk-app",
     "launch": "protonvpn-app"
+  },
+  {
+    "id": "jdownloader",
+    "name": "JDownloader",
+    "description": "Free download manager that grabs links from web pages and clipboard, resumes broken downloads, extracts archives and supports premium hoster accounts.",
+    "category": "Internet",
+    "source": "aur",
+    "package": "jdownloader2",
+    "launch": "jdownloader"
+  },
+  {
+    "id": "qbittorrent",
+    "name": "qBittorrent",
+    "description": "Open-source BitTorrent client with a clean Qt interface, built-in search, RSS downloads and a remote web interface.",
+    "category": "Internet",
+    "source": "repo",
+    "package": "qbittorrent",
+    "launch": "qbittorrent"
+  },
+  {
+    "id": "faugus-launcher",
+    "name": "Faugus Launcher",
+    "description": "Simple, lightweight launcher for running Windows games on Linux with Proton through UMU, including a built-in Proton manager.",
+    "category": "Gaming",
+    "source": "aur",
+    "package": "faugus-launcher",
+    "launch": "faugus-launcher"
+  },
+  {
+    "id": "lutris",
+    "name": "Lutris",
+    "description": "Open gaming platform that brings your Linux, Windows and emulated games together in one library, with community install scripts.",
+    "category": "Gaming",
+    "source": "repo",
+    "package": "lutris",
+    "launch": "lutris"
+  },
+  {
+    "id": "steam",
+    "name": "Steam",
+    "description": "Valve's game store and library, with Proton for running Windows games, cloud saves, Remote Play and the Steam Workshop.",
+    "category": "Gaming",
+    "source": "repo",
+    "package": "steam",
+    "launch": "steam"
+  },
+  {
+    "id": "torbrowser",
+    "name": "Tor Browser",
+    "description": "Privacy-focused browser that routes traffic through the Tor network. This installs the launcher, which downloads and verifies the browser on first run.",
+    "category": "Internet",
+    "source": "repo",
+    "package": "torbrowser-launcher",
+    "launch": "torbrowser-launcher"
+  },
+  {
+    "id": "firefox",
+    "name": "Firefox",
+    "description": "Mozilla's open-source web browser with strong privacy controls, container tabs and a large library of extensions.",
+    "category": "Internet",
+    "source": "repo",
+    "package": "firefox",
+    "launch": "firefox"
+  },
+  {
+    "id": "waterfox",
+    "name": "Waterfox",
+    "description": "Privacy-minded browser based on Firefox, with extra customization and no telemetry. This uses the prebuilt package.",
+    "category": "Internet",
+    "source": "aur",
+    "package": "waterfox-bin",
+    "launch": "waterfox"
+  },
+  {
+    "id": "brave",
+    "name": "Brave",
+    "description": "Chromium-based browser with built-in ad and tracker blocking, a private-window mode with Tor, and sync across devices.",
+    "category": "Internet",
+    "source": "aur",
+    "package": "brave-bin",
+    "launch": "brave"
+  },
+  {
+    "id": "hytale-launcher",
+    "name": "Hytale Launcher",
+    "description": "The official launcher for Hytale, Hypixel Studios' block-based sandbox adventure game. It downloads, installs and updates the game for you.",
+    "category": "Gaming",
+    "source": "flatpak",
+    "package": "com.hypixel.HytaleLauncher",
+    "download_page": "https://accounts.hytale.com/download"
   }
 ]
