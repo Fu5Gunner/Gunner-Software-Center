@@ -33,7 +33,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-__version__ = "1.7.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
+__version__ = "1.7.1"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
 APP_DIR = Path(__file__).resolve().parent  # where the app (and its default list) is installed
 USER_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "gunner-installer"
 # A programs.json in ~/.config/gunner-installer/ overrides the one shipped with the app,
@@ -117,15 +117,30 @@ def make_askpass():
     return path
 
 
+def repo_has(pkg):
+    """True if this package is in a configured repo (pacman -Si), not only the AUR."""
+    try:
+        return subprocess.run(
+            ["pacman", "-Si", "--", pkg], capture_output=True, timeout=15
+        ).returncode == 0
+    except Exception:
+        return False
+
+
 def get_optdeps(helper, pkg):
-    """Return [(name, description)] of not-yet-installed optional deps."""
+    """Return (deps, skipped) for not-yet-installed optional deps.
+
+    deps is [(name, description)] of packages available in a repo.
+    skipped is AUR-only names: installing those from the GUI can stall for hours
+    (e.g. JDownloader's phantomjs pulling qt5-webkit → qt5-doc).
+    """
     try:
         out = subprocess.run(
             [helper, "-Si", pkg], capture_output=True, text=True, timeout=60
         ).stdout
     except Exception:
-        return []
-    deps, capture = [], False
+        return [], []
+    deps, skipped, capture = [], [], False
     for line in out.splitlines():
         if re.match(r"^Optional Deps\s*:", line):
             capture, value = True, line.split(":", 1)[1].strip()
@@ -138,9 +153,13 @@ def get_optdeps(helper, pkg):
             continue
         name, _, desc = value.partition(":")
         name = re.split(r"[<>=]", name.strip())[0]
-        if name:
+        if not name:
+            continue
+        if repo_has(name):
             deps.append((name, desc.strip()))
-    return deps
+        else:
+            skipped.append(name)
+    return deps, skipped
 
 
 class OptDepsDialog(QDialog):
@@ -1152,7 +1171,10 @@ class Installer(QMainWindow):
             steps.append((name, f"Install {name}", base + [pkg]))
             self.log(f"Looking up recommended dependencies for {name}…")
             QApplication.processEvents()
-            deps = get_optdeps(self.helper, pkg)
+            deps, skipped = get_optdeps(self.helper, pkg)
+            if skipped:
+                self.log("Skipping AUR-only optional dependencies (they can take hours to build): "
+                         + ", ".join(skipped))
             if deps:
                 picked = OptDepsDialog(name, deps, self).selected()
                 if picked:

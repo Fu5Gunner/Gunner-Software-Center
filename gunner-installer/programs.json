@@ -77,7 +77,7 @@
     "name": "JDownloader",
     "description": "Free download manager that grabs links from web pages and clipboard, resumes broken downloads, extracts archives and supports premium hoster accounts.",
     "category": "Internet",
-    "source": "aur",
+    "source": "repo",
     "package": "jdownloader2",
     "launch": "jdownloader"
   },

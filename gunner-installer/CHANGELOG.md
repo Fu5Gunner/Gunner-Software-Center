@@ -9,6 +9,21 @@ Each version opens with a short summary paragraph, followed by the sections that
 Added (new features and programs), Updated (changed items, written as name (old) -> (new))
 and Patched (fixes). Every item gets its own bullet.
 
+## 1.7.1
+
+Installing JDownloader could get stuck compiling Qt documentation, because its optional
+dependency phantomjs pulled qt5-webkit and qt5-doc from the AUR. AUR-only optional
+dependencies are now skipped, and JDownloader is installed from the official repos.
+
+### Updated
+
+* JDownloader (AUR) -> (repo)
+
+### Patched
+
+* install of JDownloader getting stuck building qt5-doc, by skipping AUR-only optional
+  dependencies such as phantomjs
+
 ## 1.7.0
 
 Eighteen new programs join the catalog, from office tools and emulators to game launchers. Flatpak installs are now more reliable, and command-line tools no longer get a Launch button.

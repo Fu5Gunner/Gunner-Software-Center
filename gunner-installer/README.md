@@ -44,6 +44,7 @@ See `CHANGELOG.md`. The version is set once, in `gunner_installer.py`; run `gunn
 
 ## Setup notes for some programs
 
+* JDownloader: optional phantomjs is not installed (it tries to build Qt documentation from the AUR and can hang). The app itself is installed from the CachyOS repos.
 * Tailscale: run `sudo systemctl enable --now tailscaled`, then `sudo tailscale up`.
 * KDE Connect: open TCP and UDP ports 1714-1764 if you use a firewall.
 * lsfg-vk: needs Lossless Scaling from Steam (for `Lossless.dll`).
