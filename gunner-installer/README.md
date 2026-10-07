@@ -9,6 +9,7 @@ A KDE Plasma GUI for installing, updating and managing a curated list of program
 
 This builds a `gunner-installer` pacman package from the files in this folder and installs it.
 Afterwards launch **Gunner Installer** from the application menu, or run `gunner-installer`.
+Use **Hide log** next to the progress bar if you don't want the install output shown; the choice is kept.
 
 Uninstall with `./install.sh --uninstall` (or `sudo pacman -Rns gunner-installer`).
 

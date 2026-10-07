@@ -33,13 +33,14 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-__version__ = "1.7.1"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
+__version__ = "1.8.0"  # Semantic Versioning: new features bump MINOR, bug fixes bump PATCH
 APP_DIR = Path(__file__).resolve().parent  # where the app (and its default list) is installed
 USER_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "gunner-installer"
 # A programs.json in ~/.config/gunner-installer/ overrides the one shipped with the app,
 # so you can edit your list without touching (read-only) system files.
 PROGRAMS_FILE = (USER_DIR / "programs.json"
                  if (USER_DIR / "programs.json").is_file() else APP_DIR / "programs.json")
+SETTINGS_FILE = USER_DIR / "settings.json"
 ICON_DIRS = (USER_DIR / "icons", APP_DIR / "icons")
 CACHE_DIR = Path.home() / ".cache" / "gunner-installer" / "icons"
 ICON_SIZE = 48
@@ -115,6 +116,22 @@ def make_askpass():
     )
     path.chmod(0o700)
     return path
+
+
+def load_settings():
+    try:
+        data = json.loads(SETTINGS_FILE.read_text())
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def save_settings(data):
+    try:
+        USER_DIR.mkdir(parents=True, exist_ok=True)
+        SETTINGS_FILE.write_text(json.dumps(data, indent=2) + "\n")
+    except OSError:
+        pass
 
 
 def repo_has(pkg):
@@ -627,6 +644,7 @@ class Installer(QMainWindow):
         self.helper = find_helper()
         self.askpass = None
         self.steps, self.failed, self.proc, self.after = [], set(), None, None
+        self.settings = load_settings()
 
         try:
             self.programs = json.loads(PROGRAMS_FILE.read_text())
@@ -700,12 +718,20 @@ class Installer(QMainWindow):
         self.tabs = QTabWidget()
         self.tabs.addTab(install_tab, "Install")
         self.tabs.addTab(manage_tab, "Manage")
+        self.main_layout = layout
         layout.addWidget(self.tabs, 3)
 
         self.progress = QProgressBar()
         self.progress.setRange(0, 1)
         self.progress.setTextVisible(False)
-        layout.addWidget(self.progress)
+        self.log_toggle = QPushButton("Hide log")
+        self.log_toggle.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+        self.log_toggle.clicked.connect(self.toggle_log)
+        log_bar = QHBoxLayout()
+        log_bar.setContentsMargins(0, 0, 0, 0)
+        log_bar.addWidget(self.progress, 1)
+        log_bar.addWidget(self.log_toggle)
+        layout.addLayout(log_bar)
 
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
@@ -713,6 +739,7 @@ class Installer(QMainWindow):
         layout.addWidget(self.output, 2)
         self.setCentralWidget(root)
         self.setStyleSheet(STYLE)
+        self.apply_log_visible(self.settings.get("show_log", True))
         self.apply_filter()
         self.update_install_button()
         QTimer.singleShot(0, self.check_helpers)
@@ -720,6 +747,19 @@ class Installer(QMainWindow):
     # ---- helpers -------------------------------------------------------
     def log(self, text):
         self.output.appendPlainText(text.rstrip("\n"))
+
+    def apply_log_visible(self, visible):
+        """Show or hide the install log; the progress bar stays so installs are still visible."""
+        self.output.setVisible(visible)
+        self.log_toggle.setText("Hide log" if visible else "Show log")
+        self.main_layout.setStretchFactor(self.tabs, 1 if not visible else 3)
+        self.main_layout.setStretchFactor(self.output, 2 if visible else 0)
+
+    def toggle_log(self):
+        visible = not self.output.isVisible()
+        self.apply_log_visible(visible)
+        self.settings["show_log"] = visible
+        save_settings(self.settings)
 
     def categories(self):
         used = {program_category(p) for p in self.programs}
@@ -1234,6 +1274,8 @@ class Installer(QMainWindow):
     def closeEvent(self, event):
         if self.proc and self.proc.state() != QProcess.ProcessState.NotRunning:
             self.proc.kill()
+        self.settings["show_log"] = self.output.isVisible()
+        save_settings(self.settings)
         event.accept()
 
 

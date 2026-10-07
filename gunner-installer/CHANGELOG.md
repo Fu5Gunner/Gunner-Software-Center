@@ -9,6 +9,14 @@ Each version opens with a short summary paragraph, followed by the sections that
 Added (new features and programs), Updated (changed items, written as name (old) -> (new))
 and Patched (fixes). Every item gets its own bullet.
 
+## 1.8.0
+
+The install log at the bottom of the window can be hidden, so the program list has more room. The choice is remembered for next time.
+
+### Added
+
+* Show log / Hide log button next to the progress bar
+
 ## 1.7.1
 
 Installing JDownloader could get stuck compiling Qt documentation, because its optional
